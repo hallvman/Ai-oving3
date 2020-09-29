@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -111,6 +111,36 @@ class MinimaxAgent(MultiAgentSearchAgent):
     Your minimax agent (question 2)
     """
 
+    def minmax(self, gameState, depth, maximizingPlayer):
+        # Checks if the gmae is zero or the game is over
+        if depth==0 or gameState.isWin() or gameState.isLose():
+            return self.evaluationFunction(gameState)
+
+        # Checks if pacman is 0
+        if maximizingPlayer==0:
+            # Makes maxEval into -infinity
+            maxEval = float('-inf')
+            # Makes children
+            children = gameState.getLegalAccess(0)
+            for child in children:
+                eval = self.minimax(gameState.generateSuccessor(0,child), depth, 1)
+                maxEval = max(eval, maxEval)
+            # Returns maxEval
+            return maxEval
+
+        else:
+            # makes +infinity
+            minEval=float('inf')
+            # Makes Children
+            children = gameState.getLegalAccess(maximizingPlayer)
+            for child in children:
+                eval = self.minimax(gameState.generateSuccessor(maximizingPlayer, child), depth, maximizingPlayer)
+                # Sets minEval to the best option between minEval and eval
+                minEval = min(minEval, eval)
+            # Returns minEval
+            return minEval
+
+
     def getAction(self, gameState):
         """
         Returns the minimax action from the current gameState using self.depth
@@ -135,12 +165,55 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Returns whether or not the game state is a losing state
         """
         "*** YOUR CODE HERE ***"
+
+        gameState.getLegalAccess(0)
+
         util.raiseNotDefined()
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
     Your minimax agent with alpha-beta pruning (question 3)
     """
+
+    def minimax(self, gameState, depth, alpha, beta, maximizingPlayer):
+        if depth==0 or gameState.isWin() or gameState.isLose():
+            return self.evaluationFunction(gameState)
+
+        if maximizingPlayer==0:
+            # Makes maxEval into -infinity
+            maxEval = float('-inf')
+            # Makes children
+            children = gameState.getLegalAccess(0)
+            for child in children:
+                eval = self.minimax(gameState.generateSuccessor(0,child), depth, alpha, beta, 1)
+                maxEval = max(eval, maxEval)
+                # Checks alpha with alpha and evaluation
+                alpha = max(alpha, eval)
+                # if True break
+                if beta <= alpha:
+                    # Break out of loop
+                    break
+            # Returns maxEval
+            return maxEval
+
+        else:
+            # makes +infinity
+            minEval=float('inf')
+            # Makes Children
+            children = gameState.getLegalAccess(maximizingPlayer)
+            for child in children:
+                eval = self.minimax(gameState.generateSuccessor(maximizingPlayer, child), depth, alpha, beta, maximizingPlayer)
+                # Sets minEval to the best option between minEval and eval
+                minEval = min(minEval, eval)
+                # checks beta with evaluation
+                beta = min(beta, eval)
+                # if true
+                if beta <= alpha:
+                    # break out of loop
+                    break
+            # Returns minEval
+            return minEval
+
 
     def getAction(self, gameState):
         """
