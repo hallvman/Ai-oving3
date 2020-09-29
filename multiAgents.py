@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-#
+# 
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -111,34 +111,44 @@ class MinimaxAgent(MultiAgentSearchAgent):
     Your minimax agent (question 2)
     """
 
-    def minmax(self, gameState, depth, maximizingPlayer):
+    def minimax(self, gameState, depth, maximizingPlayer):
         # Checks if the gmae is zero or the game is over
         if depth==0 or gameState.isWin() or gameState.isLose():
             return self.evaluationFunction(gameState)
 
-        # Checks if pacman is 0
+        # if pacman
         if maximizingPlayer==0:
             # Makes maxEval into -infinity
-            maxEval = float('-inf')
-            # Makes children
-            children = gameState.getLegalAccess(0)
+            maxEval=float('-inf')
+            # Makes actions
+            children = gameState.getLegalActions(0)
             for child in children:
-                eval = self.minimax(gameState.generateSuccessor(0,child), depth, 1)
+                eval = self.minimax(gameState.generateSuccessor(0, child), depth, 1)
                 maxEval = max(eval, maxEval)
             # Returns maxEval
             return maxEval
+
+        # if ghosts
+        elif maximizingPlayer<gameState.getNumAgents()-1:
+            minEval = float('inf')
+            children = gameState.getLegalActions(maximizingPlayer)
+            for child in children:
+                eval = self.minimax(gameState.generateSuccessor(maximizingPlayer,child), depth, maximizingPlayer+1)
+                minEval = min(eval, minEval)
+            return minEval
 
         else:
             # makes +infinity
             minEval=float('inf')
             # Makes Children
-            children = gameState.getLegalAccess(maximizingPlayer)
+            children = gameState.getLegalActions(maximizingPlayer)
             for child in children:
-                eval = self.minimax(gameState.generateSuccessor(maximizingPlayer, child), depth, maximizingPlayer)
+                eval = self.minimax(gameState.generateSuccessor(maximizingPlayer, child), depth-1, 0)
                 # Sets minEval to the best option between minEval and eval
                 minEval = min(minEval, eval)
             # Returns minEval
             return minEval
+
 
 
     def getAction(self, gameState):
@@ -166,9 +176,13 @@ class MinimaxAgent(MultiAgentSearchAgent):
         """
         "*** YOUR CODE HERE ***"
 
-        gameState.getLegalAccess(0)
+        # Makeing actions
+        actions = gameState.getLegalActions(0)
 
-        util.raiseNotDefined()
+        # Return score
+        return max(actions, key=lambda x: self.minimax(gameState.generateSuccessor(0, x), self.depth, 1))
+
+       # util.raiseNotDefined()
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
@@ -183,24 +197,36 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
             # Makes maxEval into -infinity
             maxEval = float('-inf')
             # Makes children
-            children = gameState.getLegalAccess(0)
+            children = gameState.getLegalActions(0)
             for child in children:
-                eval = self.minimax(gameState.generateSuccessor(0,child), depth, alpha, beta, 1)
+                eval = self.minimax(gameState.generateSuccessor(0, child), depth, alpha, beta, 1)
                 maxEval = max(eval, maxEval)
                 # Checks alpha with alpha and evaluation
                 alpha = max(alpha, eval)
                 # if True break
-                if beta <= alpha:
+                if beta < alpha:
                     # Break out of loop
                     break
             # Returns maxEval
             return maxEval
 
+        # if ghosts
+        elif maximizingPlayer<gameState.getNumAgents()-1:
+            minEval = float('inf')
+            children = gameState.getLegalActions(maximizingPlayer)
+            for child in children:
+                eval = self.minimax(gameState.generateSuccessor(maximizingPlayer,child), depth, alpha, beta, maximizingPlayer+1)
+                minEval = min(eval, minEval)
+                beta = min(beta, eval)
+                if beta < alpha:
+                    break
+            return minEval
+
         else:
             # makes +infinity
             minEval=float('inf')
             # Makes Children
-            children = gameState.getLegalAccess(maximizingPlayer)
+            children = gameState.getLegalActions(maximizingPlayer)
             for child in children:
                 eval = self.minimax(gameState.generateSuccessor(maximizingPlayer, child), depth, alpha, beta, maximizingPlayer)
                 # Sets minEval to the best option between minEval and eval
@@ -208,19 +234,34 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                 # checks beta with evaluation
                 beta = min(beta, eval)
                 # if true
-                if beta <= alpha:
+                if beta < alpha:
                     # break out of loop
                     break
             # Returns minEval
             return minEval
-
 
     def getAction(self, gameState):
         """
         Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+        actions = gameState.getLegalActions(0)
+
+        alpha = float('-inf')
+        beta = float('inf')
+
+        vals = []
+
+        for action in actions:
+            v = self.minimax(gameState.generateSuccessor(0, action), self.depth, alpha, beta, 1)
+            alpha = max(alpha, v)
+            vals.append(v)
+        for i in range(len(actions)):
+            if alpha == vals[i]:
+                return actions[i]
+
+       # util.raiseNotDefined()
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
