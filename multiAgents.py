@@ -110,36 +110,43 @@ class MinimaxAgent(MultiAgentSearchAgent):
     """
     Your minimax agent (question 2)
     """
-
-    def minmax(self, gameState, depth, maximizingPlayer):
+    def minimax(self, gameState, depth, maximizingPlayer):
         # Checks if the gmae is zero or the game is over
         if depth==0 or gameState.isWin() or gameState.isLose():
             return self.evaluationFunction(gameState)
 
-        # Checks if pacman is 0
+        # if pacman
         if maximizingPlayer==0:
             # Makes maxEval into -infinity
-            maxEval = float('-inf')
-            # Makes children
-            children = gameState.getLegalAccess(0)
+            maxEval=float('-inf')
+            # Makes actions
+            children = gameState.getLegalActions(0)
             for child in children:
-                eval = self.minimax(gameState.generateSuccessor(0,child), depth, 1)
+                eval = self.minimax(gameState.generateSuccessor(0, child), depth, 1)
                 maxEval = max(eval, maxEval)
             # Returns maxEval
             return maxEval
+
+        # if ghosts
+        elif maximizingPlayer<gameState.getNumAgents()-1:
+            minEval = float('inf')
+            children = gameState.getLegalActions(maximizingPlayer)
+            for child in children:
+                eval = self.minimax(gameState.generateSuccessor(maximizingPlayer,child), depth, maximizingPlayer+1)
+                minEval = min(eval, minEval)
+            return minEval
 
         else:
             # makes +infinity
             minEval=float('inf')
             # Makes Children
-            children = gameState.getLegalAccess(maximizingPlayer)
+            children = gameState.getLegalActions(maximizingPlayer)
             for child in children:
-                eval = self.minimax(gameState.generateSuccessor(maximizingPlayer, child), depth, maximizingPlayer)
+                eval = self.minimax(gameState.generateSuccessor(maximizingPlayer, child), depth-1, 0)
                 # Sets minEval to the best option between minEval and eval
                 minEval = min(minEval, eval)
             # Returns minEval
             return minEval
-
 
     def getAction(self, gameState):
         """
@@ -166,9 +173,14 @@ class MinimaxAgent(MultiAgentSearchAgent):
         """
         "*** YOUR CODE HERE ***"
 
-        gameState.getLegalAccess(0)
+        # Makeing actions
+        actions = gameState.getLegalActions(0)
 
-        util.raiseNotDefined()
+        # Return score
+        return max(actions, key=lambda x: self.minimax(gameState.generateSuccessor(0, x), self.depth, 1))
+
+        #util.raiseNotDefined()
+
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
@@ -176,40 +188,48 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
     """
 
     def minimax(self, gameState, depth, alpha, beta, maximizingPlayer):
+        # Checks if the gmae is zero or the game is over
         if depth==0 or gameState.isWin() or gameState.isLose():
             return self.evaluationFunction(gameState)
 
+        # if pacman
         if maximizingPlayer==0:
             # Makes maxEval into -infinity
-            maxEval = float('-inf')
-            # Makes children
-            children = gameState.getLegalAccess(0)
+            maxEval=float('-inf')
+            # Makes actions
+            children = gameState.getLegalActions(0)
             for child in children:
-                eval = self.minimax(gameState.generateSuccessor(0,child), depth, alpha, beta, 1)
+                eval = self.minimax(gameState.generateSuccessor(0, child), depth, alpha, beta, 1)
                 maxEval = max(eval, maxEval)
-                # Checks alpha with alpha and evaluation
                 alpha = max(alpha, eval)
-                # if True break
                 if beta <= alpha:
-                    # Break out of loop
                     break
             # Returns maxEval
             return maxEval
+
+        # if ghosts
+        elif maximizingPlayer<gameState.getNumAgents()-1:
+            minEval = float('inf')
+            children = gameState.getLegalActions(maximizingPlayer)
+            for child in children:
+                eval = self.minimax(gameState.generateSuccessor(maximizingPlayer,child), depth, alpha, beta, maximizingPlayer+1)
+                minEval = min(eval, minEval)
+                beta = min(beta, eval)
+                if beta <= alpha:
+                    break
+            return minEval
 
         else:
             # makes +infinity
             minEval=float('inf')
             # Makes Children
-            children = gameState.getLegalAccess(maximizingPlayer)
+            children = gameState.getLegalActions(maximizingPlayer)
             for child in children:
-                eval = self.minimax(gameState.generateSuccessor(maximizingPlayer, child), depth, alpha, beta, maximizingPlayer)
+                eval = self.minimax(gameState.generateSuccessor(maximizingPlayer, child), depth-1, alpha, beta, 0)
                 # Sets minEval to the best option between minEval and eval
                 minEval = min(minEval, eval)
-                # checks beta with evaluation
                 beta = min(beta, eval)
-                # if true
                 if beta <= alpha:
-                    # break out of loop
                     break
             # Returns minEval
             return minEval
@@ -220,7 +240,11 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        #util.raiseNotDefined()
+        infBeta = float('inf')
+        infAlpha = float('-inf')
+        actions = gameState.getLegalActions(0)
+        return max(actions, key=lambda x: self.minimax(gameState.generateSuccessor(0, x), self.depth, infAlpha, infBeta, 1))
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
