@@ -202,20 +202,20 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                 eval = self.minimax(gameState.generateSuccessor(0, child), depth, alpha, beta, 1)
                 maxEval = max(eval, maxEval)
                 alpha = max(alpha, eval)
-                if beta <= alpha:
+                if beta < alpha:
                     break
             # Returns maxEval
             return maxEval
-
+            
         # if ghosts
-        elif maximizingPlayer<gameState.getNumAgents()-1:
+        elif maximizingPlayer < gameState.getNumAgents()-1:
             minEval = float('inf')
             children = gameState.getLegalActions(maximizingPlayer)
             for child in children:
                 eval = self.minimax(gameState.generateSuccessor(maximizingPlayer,child), depth, alpha, beta, maximizingPlayer+1)
                 minEval = min(eval, minEval)
                 beta = min(beta, eval)
-                if beta <= alpha:
+                if beta < alpha:
                     break
             return minEval
 
@@ -229,7 +229,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                 # Sets minEval to the best option between minEval and eval
                 minEval = min(minEval, eval)
                 beta = min(beta, eval)
-                if beta <= alpha:
+                if beta < alpha:
                     break
             # Returns minEval
             return minEval
@@ -240,11 +240,28 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
+
+        '''
         #util.raiseNotDefined()
         infBeta = float('inf')
         infAlpha = float('-inf')
         actions = gameState.getLegalActions(0)
         return max(actions, key=lambda x: self.minimax(gameState.generateSuccessor(0, x), self.depth, infAlpha, infBeta, 1))
+        '''
+        actions = gameState.getLegalActions(0)
+
+        alpha = float('-inf')
+        beta = float('inf')
+
+        vals = []
+
+        for action in actions:
+            v = self.minimax(gameState.generateSuccessor(0, action), self.depth, alpha, beta, 1)
+            alpha = max(alpha, v)
+            vals.append(v)
+        for i in range(len(actions)):
+            if alpha == vals[i]:
+                return actions[i]
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
